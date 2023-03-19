@@ -7,7 +7,8 @@
 // #define WIFI_PASS
 // #define IO_USERNAME
 // #define IO_KEY 
-// #define MQTT_FEED 
+// #define MQTT_IN_FEED 
+// #define MQTT_OUT_FEED 
 
 #define RELAY_CTRL_PIN 27
 
@@ -23,11 +24,20 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 
-  if((char)payload[0]=='1'){
+  if((char)payload[0]=='1'){ // short press
     digitalWrite(LED_BUILTIN, HIGH);
 
     digitalWrite(RELAY_CTRL_PIN, HIGH);
     delay(500);
+    digitalWrite(RELAY_CTRL_PIN, LOW);
+
+    digitalWrite(LED_BUILTIN, LOW);
+  }
+  else if((char)payload[0]=='2'){ // long press
+    digitalWrite(LED_BUILTIN, HIGH);
+
+    digitalWrite(RELAY_CTRL_PIN, HIGH);
+    delay(5000);
     digitalWrite(RELAY_CTRL_PIN, LOW);
 
     digitalWrite(LED_BUILTIN, LOW);
@@ -44,9 +54,9 @@ void connectToMqtt() {
     if (client.connect("arduinoClient", IO_USERNAME, IO_KEY)) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      // client.publish("outTopic","hello world");
+      client.publish(MQTT_OUT_FEED,":)");
       // ... and resubscribe
-      client.subscribe(MQTT_FEED);
+      client.subscribe(MQTT_IN_FEED);
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
