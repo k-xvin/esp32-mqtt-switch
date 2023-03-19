@@ -87,14 +87,15 @@ void setup(){
 }
 
 void loop(){
-  // Reconnect MQTT if it is down
-  if(!client.connected()){
+  // Reconnect WiFI and MQTT if it is down
+  if(WiFi.status() != WL_CONNECTED){
+    reconnectToWifiAndMqtt();
+  }
+  // Reconnect to just MQTT if it is down
+  else if(!client.connected()){
     connectToMqtt();
   }
   // Reconnect wifi+mqtt if wifi is down
-  else if(WiFi.status() != WL_CONNECTED){
-    reconnectToWifiAndMqtt();
-  }
   else {
     client.loop();
   }
