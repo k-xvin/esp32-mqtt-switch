@@ -45,8 +45,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void connectToMqtt() {
-  client.setServer("io.adafruit.com", 1883);
-  client.setCallback(callback);
+  // client.disconnect();
   // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
@@ -68,6 +67,7 @@ void connectToMqtt() {
 }
 
 void connectToWifi(){
+  // WiFi.disconnect();
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   while(WiFi.status() != WL_CONNECTED) {
     delay(1000);
@@ -78,8 +78,8 @@ void connectToWifi(){
 
 void reconnectToWifiAndMqtt(){
   // Drop existing connections
-  client.disconnect();
-  WiFi.disconnect();
+  // client.disconnect();
+  // WiFi.disconnect();
 
   // Connect to WIFI
   connectToWifi();
@@ -93,6 +93,9 @@ void setup(){
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(RELAY_CTRL_PIN, OUTPUT);
 
+  client.setServer("io.adafruit.com", 1883);
+  client.setCallback(callback);
+
   reconnectToWifiAndMqtt();  
 }
 
@@ -105,8 +108,5 @@ void loop(){
   else if(!client.connected()){
     connectToMqtt();
   }
-  // Reconnect wifi+mqtt if wifi is down
-  else {
-    client.loop();
-  }
+  client.loop();
 }
