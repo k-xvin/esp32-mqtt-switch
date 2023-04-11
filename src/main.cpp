@@ -45,15 +45,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void connectToMqtt() {
-  // client.disconnect();
   // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (client.connect("arduinoClient", IO_USERNAME, IO_KEY)) {
+    // Don't need to send an LWT message on disconnect
+    if (client.connect("esp32Client", IO_USERNAME, IO_KEY)) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish(MQTT_OUT_FEED,":)");
+      client.publish(MQTT_OUT_FEED,"1");
       // ... and resubscribe
       client.subscribe(MQTT_IN_FEED);
     } else {
@@ -67,7 +67,6 @@ void connectToMqtt() {
 }
 
 void connectToWifi(){
-  // WiFi.disconnect();
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   while(WiFi.status() != WL_CONNECTED) {
     delay(1000);
@@ -77,10 +76,6 @@ void connectToWifi(){
 }
 
 void reconnectToWifiAndMqtt(){
-  // Drop existing connections
-  // client.disconnect();
-  // WiFi.disconnect();
-
   // Connect to WIFI
   connectToWifi();
 
@@ -99,14 +94,18 @@ void setup(){
   reconnectToWifiAndMqtt();  
 }
 
+unsigned long previousTime = 0;
 void loop(){
   // Reconnect WiFI and MQTT if it is down
   if(WiFi.status() != WL_CONNECTED){
+    Serial.println("WiFi down, reconnecting...");
     reconnectToWifiAndMqtt();
   }
   // Reconnect to just MQTT if it is down
   else if(!client.connected()){
+    Serial.println("MQTT down, reconnecting...");
     connectToMqtt();
   }
+
   client.loop();
 }
